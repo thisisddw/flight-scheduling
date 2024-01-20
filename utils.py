@@ -34,7 +34,8 @@ def m2hm(t: int)->str:
 
 
 def markdown_table(flights, perm, details):
-    table = '|     |id   |type |EOBT |开始滑行|滑行时间|起飞时间|延迟 |\n'
+    table  = '|     |id   |type |EOBT |开始滑行|滑行时间|起飞时间|延迟 |\n'
+    table += '|-----|-----|-----|-----|--------|--------|--------|-----|\n'
 
     for i, p in enumerate(perm):
         flight = flights[p]
