@@ -1,21 +1,57 @@
+import json
 import csv
 import method
 
 
-def load_sep():
-    ret = {}
+class PkcGroup:
+    def __init__(self, name: str, id_list: str, slip_time: int) -> None:
+        self.name = name
+        self.slip = slip_time
+        self.id_list = []
+        for s in id_list.split(" "):
+            r = [int(_) for _ in s.split("-")]
+            if len(r) == 1:
+                self.id_list.append((r[0], r[0]))
+            else:
+                assert(len(r) == 2)
+                self.id_list.append((r[0], r[1]))
+    
+    def __contains__(self, pkc_id: int):
+        for l, r in self.id_list:
+            if pkc_id >= l and pkc_id <= r:
+                return True
+        return False
+
+
+def load_config():
+    pkc = []
+    with open("config/pkcg.json") as f:
+        for [n, id, slip] in json.load(f):
+            pkc.append(PkcGroup(n, id, slip))
+
+    sep = {}
     types = ['A380', 'H', 'M', 'L']
     with open('config/sep.csv', 'r', newline='') as f:
         reader = csv.DictReader(f)
         for row in reader:
             ty = row['type']
-            ret[ty] = {}
+            sep[ty] = {}
             for k in types:
-                ret[ty][k] = int(row[k])
-    return ret
+                sep[ty][k] = int(row[k])
+
+    return pkc, sep
 
 
-def load_data(path: str):
+def load_data(path: str, pkcgs: list[PkcGroup]):
+
+    def get_slip_time(pkcgs: list[PkcGroup], id: int):
+        ret = []
+        for pkcg in pkcgs:
+            if id in pkcg:
+                ret.append(pkcg.slip)
+        assert(len(ret) == 1)
+        return ret[0]
+
     ret = []
     with open(path, 'r', newline='') as f:
         reader = csv.DictReader(f)
@@ -23,7 +59,7 @@ def load_data(path: str):
             substr = row['EOBT'].split(':')
             h, m = int(substr[0]), int(substr[1])
             row['EOBT'] = h*60 + m
-            row['SLIP'] = int(row['SLIP'])
+            row['SLIP'] = get_slip_time(pkcgs, int(row['PKC']))
             ret.append(row)
     return ret
 
@@ -33,7 +69,7 @@ def m2hm(t: int)->str:
     return f'{t // 60}:{"0" + m if len(m) < 2 else m}'
 
 
-def markdown_table(flights, perm, details):
+def markdown_table(flights: list, perm: list, details: list):
     table  = '|     |id   |type |EOBT |开始滑行|滑行时间|起飞时间|延迟 |\n'
     table += '|-----|-----|-----|-----|--------|--------|--------|-----|\n'
 
@@ -50,10 +86,7 @@ def markdown_table(flights, perm, details):
     return table
 
 
-def test_method(solve: callable, data_path: str)->dict:
-    sep = load_sep()
-    flights = load_data(data_path)
-    
+def test_method(solve: callable, sep: dict, flights: list)->dict:
     perm = solve(flights, sep)
     details, tot_delay = method.schedule_details(flights, sep, perm)
 

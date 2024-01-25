@@ -25,8 +25,10 @@ module_name = {
 
 @st.cache_data
 def compute(method_name: str, data_path: str):
+    pkcgs, sep = load_config()
+    flights = load_data(data_path, pkcgs)
     solver = importlib.import_module("method." + module_name[method_name])
-    return test_method(solver.solve, data_path)
+    return test_method(solver.solve, sep, flights)
 
 
 result = compute(method, data_path)
