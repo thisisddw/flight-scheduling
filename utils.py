@@ -39,7 +39,7 @@ class InputAdaptor:
             if self.cast[k][1] is None:
                 self.cast[k] = self.cast[k][0], lambda x: x
 
-    def __call__(self, row: dict) -> Any:
+    def __call__(self, row: dict) -> str:
         new_row = { 'original': row }
         for src, (trg, cast) in self.cast.items():
             new_row[trg] = cast(row[src])
@@ -90,7 +90,7 @@ def load_data(path: str, pkcgs: list[PkcGroup], adaptor: InputAdaptor = None):
         return True
 
     ret = []
-    with open(path, 'r', newline='') as f:
+    with open(path, 'r', newline='', encoding='utf-8') as f:
         reader = csv.DictReader(f)
         for row in reader:
             if adaptor:

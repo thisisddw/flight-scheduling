@@ -22,9 +22,10 @@ config = {
     }
 }[data_path]
 
-df = pd.read_csv(data_path, encoding='ANSI')
+df = pd.read_csv(data_path, encoding='utf-8')
 
 st.subheader("航班数据")
+# st.dataframe(df)
 st.table(df)
 
 method = st.radio(
