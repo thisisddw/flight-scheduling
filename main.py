@@ -5,13 +5,14 @@ import importlib
 methods_to_test = [
     'fcfs',
     'sortbytakeoff',
-    'bruteforce',
+    # 'bruteforce',
 ]
 
 pkcgs, sep = load_config()
 
 if __name__ == '__main__':
-    flights = load_data('example.csv', pkcgs)
+    # flights = load_data('data/example.csv', pkcgs)
+    flights = load_data('data/input_sample.csv', pkcgs, default_adaptor)
     result = {}
     
     for method in methods_to_test:
