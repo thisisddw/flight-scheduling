@@ -2,6 +2,7 @@ import json
 import csv
 import method
 from typing import Any, Callable
+import pandas as pd
 
 
 class PkcGroup:
@@ -128,11 +129,30 @@ def markdown_table(flights: list, perm: list, details: list):
     return table
 
 
+def dataframe(flights: list, perm: list, details: list):
+    L = []
+    for i, p in enumerate(perm):
+        flight = flights[p]
+        ss, to = details[i]['slip start'], details[i]['take off']
+        delay = ss - flight["EOBT"]
+        L.append({
+            'id': flight['id'],
+            'type': flight['type'],
+            'EOBT': m2hm(flight['EOBT']),
+            '开始滑行': m2hm(ss),
+            '滑行时间': flight['SLIP'],
+            '起飞时间': m2hm(to),
+            '延迟': delay
+        })
+    return pd.DataFrame(L)
+
+
 def test_method(solve: Callable, sep: dict, flights: list)->dict:
     perm = solve(flights, sep)
     details, tot_delay = method.schedule_details(flights, sep, perm)
 
     return {
         'markdown table': markdown_table(flights, perm, details),
+        'dataframe': dataframe(flights, perm, details),
         'total delay': tot_delay,
     }
