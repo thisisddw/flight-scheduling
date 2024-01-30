@@ -1,76 +1,21 @@
-import sys
-if "." not in sys.path:
-    sys.path.append(".")
-
 import streamlit as st
-import pandas as pd
-import importlib
-from utils import *
-from description import description
-
-st.markdown(description)
-
-st.markdown("## 交互演示")
-
-st.markdown("### 航班数据")
-
-data_path = st.radio(
-    """选择输入数据。选项一是编造的简单测试数据，选项二是2024.1.15的航班数据。
-    上传文件现在只支持选项二格式的csv文件，而且必须是utf-8编码。""",
-    ['data/example.csv', 'data/input_sample.csv', '上传文件'])
-
-if data_path == '上传文件':
-    uploaded_file = st.file_uploader("Choose a CSV file", type='csv')
-    if not uploaded_file:
-        st.warning('请上传文件')
-        st.stop()
-    data_path = 'data/uploaded_file.csv'
-    content = uploaded_file.read()
-    with open(data_path, 'wb') as f:
-        f.write(content)
-
-config = {
-    'data/example.csv': {
-        'methods': ["不做处理", "按最早可能起飞时间排序", "暴力枚举"],
-        'adaptor': None
-    },
-    'data/input_sample.csv': {
-        'methods': ["不做处理", "按最早可能起飞时间排序"],
-        'adaptor': default_adaptor
-    },
-    'data/uploaded_file.csv': {
-        'methods': ["不做处理", "按最早可能起飞时间排序"],
-        'adaptor': default_adaptor
-    }
-}[data_path]
-
-df = pd.read_csv(data_path, encoding='utf-8')
-
-st.dataframe(df)
-# st.table(df)
-
-method = st.radio(
-    "选择一种方法",
-    config['methods'])
-module_name = {
-    "不做处理": "fcfs", 
-    "暴力枚举": "bruteforce", 
-    "按最早可能起飞时间排序": "sortbytakeoff",
-}
 
 
-@st.cache_data
-def compute(method_name: str, data_path: str):
-    pkcgs, sep = load_config()
-    flights = load_data(data_path, pkcgs, config['adaptor'])
-    solver = importlib.import_module("method." + module_name[method_name])
-    return test_method(solver.solve, sep, flights)
+st.set_page_config(
+    page_title="航班调度演示",
+    page_icon="✈️",
+    # layout="wide",
+    initial_sidebar_state="expanded"
+)
 
+"""
+# 航班调度演示
 
-result = compute(method, data_path)
+因为我们不清楚用户想要在什么情景下使用航班调度工具，所以我们创建了这个演示程序，希望用户能够加深对程序工作方式的理解，进一步明确需求。在这里我们只采用了一种简单的调度策略，而且没有考虑跑道方向和降落航班这两个影响因素。接下来我们会进一步改良调度方法。
 
-st.markdown("### 程序输出")
+希望用户看过这个演示后向我们明确这些内容：
 
-st.write(f"总延迟：{result['total delay']}")
-# st.markdown(result["markdown table"])
-st.dataframe(result['dataframe'])
+- 程序的功能是不是用户需要的。
+- 输入和输出采取什么形式。
+- 滑行时间和安全间隔的设置是否合理，怎样改进。
+"""

@@ -3,3 +3,4 @@ __pycache__
 /fly.toml
 /Procfile
 /requirements.txt
+/data/uploaded_file.csv
