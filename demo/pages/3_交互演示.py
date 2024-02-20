@@ -33,17 +33,17 @@ if data_path == '上传文件':
 
 config = {
     'data/example.csv': {
-        'methods': ["不做处理", "按最早可能起飞时间排序", "暴力枚举"],
+        'methods': ["按最早可能起飞时间排序", "暴力枚举", "不做处理"],
         'desc': '这是我们按照第一种输入格式编造的简单测试数据。',
         'adaptor': None
     },
     'data/input_sample.csv': {
-        'methods': ["不做处理", "按最早可能起飞时间排序"],
+        'methods': ["按最早可能起飞时间排序", "不做处理"],
         'desc': '来自用户的2024.1.15航班数据。我们按照它的格式设置了第二种输入格式。',
         'adaptor': default_adaptor
     },
     'data/uploaded_file.csv': {
-        'methods': ["不做处理", "按最早可能起飞时间排序"],
+        'methods': ["按最早可能起飞时间排序", "不做处理"],
         'desc': '如果格式错误或编码错误可能会报错。',
         'adaptor': default_adaptor
     }
