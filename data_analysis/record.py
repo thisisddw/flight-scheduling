@@ -1,5 +1,6 @@
-from typing import Union, TextIO
-import parse
+from typing import Union, TextIO, Iterable
+from io import TextIOBase
+from . import parse
 from pathlib import Path
 from itertools import chain
 
@@ -28,10 +29,10 @@ class RecordIterator:
         if isinstance(file, str):
             with open(file, 'r') as f:
                 self.lines = f.readlines()
-        elif isinstance(file, TextIO):
+        elif isinstance(file, TextIOBase):
             self.lines = file.readlines()
         else:
-            raise ValueError('Invalid input type')
+            raise ValueError(f'Invalid input type {str(type(file))}')
         
         for i in range(len(self.lines)):
             self.lines[i] = self.lines[i].strip()
@@ -84,3 +85,12 @@ class Unique:
             t = self.iter.__next__()
         self.set.add(str(t))
         return t
+
+
+def to_df_data(records: list[Record], ARCIDs: list[str], fields: list[str], default_val: str = '') -> tuple[dict, list]:
+    df_data = {}
+    valid_records = sorted([r for r in records if r.adex['ARCID'] in ARCIDs], key=lambda r: r.adex['ARCID'])
+    for f in fields:
+        row = [(r.adex[f] if f in r.adex and r.adex[f] != '' else default_val) for r in valid_records]
+        df_data[f] = row
+    return df_data, [r.adex['ARCID'] for r in valid_records]
