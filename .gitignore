@@ -4,3 +4,5 @@ __pycache__
 /Procfile
 /requirements.txt
 /data/uploaded_file.csv
+*.json
+*.log

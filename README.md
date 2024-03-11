@@ -1,30 +1,22 @@
-## 运行环境
+## 使用方法
 
-- python 3.11
-
-## 运行方法
-
+### 数据处理：
 ```
-python main.py
+python -m data_analysis.preprocess  # 读取 logs/ 目录下的文件，清洗数据，产生data.json
+python -m data_analysis.main        # 读取data.json，按照 机位-跑道-机型 分组，产生result.json
 ```
 
-## 代码结构
+### 数据展示：
+
+准备运行环境：
 
 ```
-.
-├── config
-│   └── sep.csv         # 设置安全间隔
-├── example.csv         # 一个航班样例
-├── main.py             # 程序入口
-├── method              # 用于测试的各种方法
-│   ├── __init__.py
-│   ├── bruteforce.py
-│   ├── fcfs.py
-│   └── sortbytakeoff.py
-├── README.md
-└── utils.py
+python -m venv env
+env\Scripts\activate
+pip install streamlit
 ```
 
-### 输入格式
-
-参考example.csv和utils.py的load_data函数
+首先把result.json放到demo/目录下，然后
+```
+streamlit run demo/demo.py          # 产生demo网页
+```
