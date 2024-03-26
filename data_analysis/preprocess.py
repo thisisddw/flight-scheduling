@@ -25,6 +25,11 @@ def excel_to_dict(filename):
     for row in sheet.iter_rows(min_row=2, values_only=True):
         if row[-1] == ' NNN':
             continue
+        row = list(row)
+        #print(row)
+        for i in range(len(row)):
+            row[i] = str(row[i]).strip()
+        #print(row)
         row_dict = dict(zip(headers, row))
         data.append(row_dict)
     
@@ -49,7 +54,6 @@ if __name__ == '__main__':
     it = excel_to_dict(excel_path)
     data = list(process_data(it))
     print(len(data))
-    print(type(data[0]))
     old_data = DirEstripIterator(test_path)
     data = data + list(process_data(old_data))
 
