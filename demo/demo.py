@@ -5,6 +5,7 @@ if "." not in sys.path:
 import streamlit as st
 import pandas as pd
 import json
+from typing import Union
 
 from data_analysis.main import get_gates_types
 
@@ -19,10 +20,33 @@ def get_result()->tuple[dict[str, list[int]], list[str], list[str]]: # result, g
         return s
     return r, sorted(g, key = lambda x: pad(x)), sorted(t)
 
-result, gates, types = get_result()
+@st.cache_data
+def get_model_readable_result()->dict[str, list[str]]:  # format: {"{gate}-{dway}-{type}": ["{mean}", "{sigma}"]}
+    with open('demo/readable_result.json') as f:
+        r = json.load(f)
+    return r
 
-gates_shown = st.multiselect('选择停机位', gates, default=gates)
-# types_shown = st.multiselect('选择机型', types, default=types[:5])
+result, gates, types = get_result()
+model_result = get_model_readable_result()
+
+gate_groups = ['0-49', '50-99', '100-149', 'others']
+gate_groups = st.multiselect('选择停机位', gate_groups, default=gate_groups)
+def check(x: str)->bool:
+    int_x = None
+    try:
+        int_x = int(x)
+    except ValueError:
+        pass
+    type = 'others'
+    if int_x and 0 <= int_x <= 49:
+        type = '0-49'
+    if int_x and 50 <= int_x <= 99:
+        type = '50-99'
+    if int_x and 100 <= int_x <= 149:
+        type = '100-149'
+    return type in gate_groups
+gates_shown = list(filter(check, gates))
+
 type_groups = st.multiselect('选择机型', ['Axxx', 'Bxxx', 'Others'], default=['Axxx'])
 def check(x: str)->bool:
     if 'Axxx' in type_groups and x.startswith('A'):
@@ -38,11 +62,20 @@ direction = st.radio(
     ["07", "25"]
 )
 format = st.radio(
-    "选择展示格式",
-    ['样本数量', '平均值（样本数量）', '平均值, 样本标准差（样本数量）', '最小值, 最大值（样本数量）']
+    "选择展示内容",
+    [
+        '样本数量', 
+        '平均值（样本数量）', 
+        '平均值, 样本标准差（样本数量）', 
+        '最小值, 最大值（样本数量）', 
+        '统计模型结果（平均值, 标准差）'
+    ]
 )
 
-def get_str(data: list[int])->str:
+def get_str(data: list[Union[int, str]])->str:
+
+    if format == '统计模型结果（平均值, 标准差）':
+        return f'{data[0]}, {data[1]}' if len(data) else ''
 
     def s2ms(x: int)->str:
         assert isinstance(x, int)
@@ -66,7 +99,9 @@ def get_str(data: list[int])->str:
         raise Exception('Unexpected Format')
 
 df_data = {
-    ty : [get_str(result.get(f'{g}-{direction}-{ty}', [])) for g in gates_shown] for ty in types_shown
+    ty : [get_str((result if format != '统计模型结果（平均值, 标准差）' else model_result)
+                .get(f'{g}-{direction}-{ty}', [])) for g in gates_shown] 
+    for ty in types_shown
 }
 
 df = pd.DataFrame(df_data, index = gates_shown)

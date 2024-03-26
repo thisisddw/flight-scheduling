@@ -22,7 +22,7 @@ env\Scripts\activate
 pip install streamlit
 ```
 
-首先把result.json放到demo/目录下，然后
+首先把result.json和readable_result.json放到demo/目录下，然后
 ```
 streamlit run demo/demo.py          # 产生demo网页
 ```
