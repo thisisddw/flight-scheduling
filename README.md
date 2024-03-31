@@ -2,7 +2,7 @@
 
 ### 数据处理：
 ```
-python -m data_analysis.preprocess  # 读取 logs/ 目录下的文件，清洗数据，产生data.json
+python -m data_analysis.preprocess  # 读取 logs/ 目录下的文件，清洗数据，同时将data.xlsx放到data目录下，读取后合并去重，产生data.json
 python -m data_analysis.main        # 读取data.json，按照 机位-跑道-机型 分组，产生result.json
 ```
 

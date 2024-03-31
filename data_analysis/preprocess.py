@@ -50,7 +50,7 @@ def process_data(file):
 
 if __name__ == '__main__':
     current_dt = os.getcwd()
-    excel_path = os.path.join(current_dt, 'data_analysis', 'data', '2024-03.xlsx')
+    excel_path = os.path.join(current_dt, 'data_analysis', 'data', 'data.xlsx')
     it = excel_to_dict(excel_path)
     data = list(process_data(it))
     print(len(data))
@@ -62,12 +62,15 @@ if __name__ == '__main__':
     unique_data = []
     for d in data:
         plan_id = int(d['PlanID'])
+        anti_ice = int(d['AREA_DEICING_ID'])
         if plan_id in seen_plan_id:
+            continue
+        if anti_ice != 0:
             continue
         unique_data.append(d)
         seen_plan_id.add(plan_id)
     print(len(unique_data))
-    data = unique_data
+    data = unique_data #flights in unique_data do not contain anti-ice
 
     with open(output_path, 'w') as f:
         json.dump(data, f)
