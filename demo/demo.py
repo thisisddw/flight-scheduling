@@ -68,11 +68,12 @@ format = st.radio(
         '平均值（样本数量）', 
         '平均值, 样本标准差（样本数量）', 
         '最小值, 最大值（样本数量）', 
-        '统计模型结果（平均值, 标准差）'
+        '统计模型结果（平均值, 标准差）',
+        '统计模型结果 vs 样本(模型均值、标准差；样本均值、标准差、最小值、最大值[样本数量])'
     ]
 )
 
-def get_str(data: list[Union[int, str]])->str:
+def get_str(data: list[Union[int, str]], origin_data: list[Union[int, str]])->str:
 
     if format == '统计模型结果（平均值, 标准差）':
         return f'{data[0]}, {data[1]}' if len(data) else ''
@@ -83,27 +84,29 @@ def get_str(data: list[Union[int, str]])->str:
         s = x % 60
         return f'{m:02d}:{s:02d}'
 
-    if len(data) != 0:
-        mean = int(sum(data) / len(data))
-        var = sum([(x - mean) ** 2 for x in data]) / (len(data) - 1) if len(data) > 1 else 0
+    if len(origin_data) != 0:
+        mean = int(sum(origin_data) / len(origin_data))
+        var = sum([(x - mean) ** 2 for x in origin_data]) / (len(origin_data) - 1) if len(origin_data) > 1 else 0
         sd = int(var ** 0.5)
     if format == '样本数量':
-        return str(len(data))
+        return str(len(origin_data))
     elif format == '平均值（样本数量）':
-        return f'{s2ms(mean)} ({len(data)})' if len(data) else ''
+        return f'{s2ms(mean)} ({len(origin_data)})' if len(origin_data) else ''
     elif format == '平均值, 样本标准差（样本数量）':
-        return f'{s2ms(mean)}, {s2ms(sd)} ({len(data)})' if len(data) else ''
+        return f'{s2ms(mean)}, {s2ms(sd)} ({len(origin_data)})' if len(origin_data) else ''
     elif format == '最小值, 最大值（样本数量）':
-        return f'{s2ms(min(data))}, {s2ms(max(data))} ({len(data)})' if len(data) else ''
+        return f'{s2ms(min(origin_data))}, {s2ms(max(origin_data))} ({len(origin_data)})' if len(origin_data) else ''
+    elif format == '统计模型结果 vs 样本(模型均值、标准差；样本均值、标准差、最小值、最大值[样本数量])':
+        return f"{data[0]},{data[1]}  {s2ms(mean)},{s2ms(sd)} {s2ms(min(origin_data))},{s2ms(max(origin_data))} [{len(origin_data)}] " if len(origin_data) else ""
     else:
         raise Exception('Unexpected Format')
 
 df_data = {
-    ty : [get_str((result if format != '统计模型结果（平均值, 标准差）' else model_result)
-                .get(f'{g}-{direction}-{ty}', [])) for g in gates_shown] 
+    ty : [get_str(model_result.get(f'{g}-{direction}-{ty}', []), result.get(f'{g}-{direction}-{ty}', [])) for g in gates_shown] 
     for ty in types_shown
 }
 
+
 df = pd.DataFrame(df_data, index = gates_shown)
-st.dataframe(df)
+#st.dataframe(df)
 st.table(df)
